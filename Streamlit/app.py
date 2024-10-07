@@ -4,18 +4,15 @@ import yfinance as yf
 
 from yahooquery import search
 
-from datetime import date, timedelta
+from datetime import datetime, timedelta
 
 import plotly.graph_objects as go
 
-import plotly.express as px
-
-from plotly.subplots import make_subplots 
-
 import matplotlib.pyplot as plt
+
 import pandas as pd
 
-from stock_model import model_train
+from stock_model import stock_prediction
 
 def get_input() -> pd.DataFrame :
     try:
@@ -29,7 +26,8 @@ def get_input() -> pd.DataFrame :
             return load_data(ticker)
     except Exception as e:
         st.error(f"Error occurred: {e}")
-        
+   
+#search based on company or the ticker symbol of a stock 
 def set_ticker(search_type) -> yf.ticker :
     
     if search_type =="Ticker":
@@ -43,6 +41,7 @@ def set_ticker(search_type) -> yf.ticker :
 #function to retrive the ticker of a Company
 def search_comp(company_name) -> yf.ticker:
 
+    #searching ticker for the company names
     search_result = search(company_name)
 
     if search_result['quotes']:
@@ -61,16 +60,24 @@ def search_comp(company_name) -> yf.ticker:
 
 
 def load_data(ticker) -> pd.DataFrame:
-    try:        
-        stock_data = yf.download(ticker,period='ytd',interval='1d') 
+    
+    try:    
+        #selecting today as end date and from 1year back as the start date
+        start_date=  datetime.now() - timedelta(days=365)
+        end_date=datetime.today()
+
+        stock_data = yf.download(ticker,start=start_date,end=end_date) 
        # stock_data=stock_data.drop(['Dividends','Stock Splits'],axis=1)
         
         # Example of fetching data for a custom date range:
         # stock_data = yf.download(ticker, start=start_date, end=end_date)
         return stock_data
+    
     except Exception as e:
+        
         st.error(f"Failed to fetch data for {ticker}. Error: {e}")
         return None
+    
 def filter_data(df: pd.DataFrame) -> pd.DataFrame:
     st.subheader("Filter Stock Price by Month")
 
@@ -97,8 +104,10 @@ def line_plot(stock_data) -> None:
     fig=plt.figure(figsize=(10, 5))
     plt.plot(stock_data['Close'], label='Price')
 
+
     #setting up the title and labels
-    plt.title("Price Movement Of Stock")
+    plt.title("Last One Year Movement of the Stock")
+    plt.suptitle("Price Movement Of Stock")
     plt.xlabel('Year')
     plt.ylabel('Price')
     
@@ -111,9 +120,7 @@ def line_plot(stock_data) -> None:
 def candlesticks_plot(df) -> None:
     #creating the past 1 year data for plotting and observation 
     #df = df.iloc[-365:]  # yf.download(ticker_symbol, start=start_date,end=end_date, progress=False)
-    
-    
-
+        
     df["Date"] = df.index
 
     df = df[["Date", "Open", "High", "Low", "Close",  "Volume"]]
@@ -150,70 +157,25 @@ def candlesticks_plot(df) -> None:
     st.plotly_chart(figure)
     #figure.show()
 
-def plot_price_volume(data) -> None:
-        #line chart of date and close
-    #last two years of data
-    df=data[-730:]
-    
-    figure = px.line(df, x='Date', y='Close',title='Stock Market Analysis with Time Period Selectors For the Past Two years')
-    
-    figure.update_xaxes(
-        rangeselector=dict(
-            buttons=list([
-                dict(count=1, label="1m", step="month", stepmode="backward"),
-                dict(count=6, label="6m", step="month", stepmode="backward"),
-                dict(count=3, label="3m", step="month", stepmode="backward"),
-                dict(count=1, label="1y", step="year", stepmode="backward"),
-                dict(step="all")
-            ])
-        )
-    )
-    
-    # Update trace to change line color
-    figure.update_traces(line=dict(color='blue'))
-    
-    #plotting both 
-    figure.update_layout(yaxis2=dict(title="Price",overlaying='y',side="right"),height=700,width=1100)
-    
-    #changing the volume in minimum amount for representtion
-    for i in range(1,df.size):
-        volume =df["Volume"]/1000000
-    
-    figure.add_trace(
-        go.Bar(x=df["Date"],  # X-axis data (dates)
-        y=df["Volume"] / 1000000,  # Y-axis data (volume in Lakhs)
-        name="Trading Volume in Lakhs",  # Legend label
-        marker=dict(color='red'),  # Specify the bar color here
-        yaxis='y2' , # Use secondary y-axis for volume
-    ))
-    
-    figure.update_layout(
-        yaxis=dict(title="Price"),  # Primary y-axis title
-        yaxis2=dict(title="Volume (Lakhs)", overlaying='y', side="right"),  # Secondary y-axis title and position
-        height=700,
-        width=1100, #increasing the size of plotting
-        bargap=0.5,   # Gap between bars
-        bargroupgap=0.1  # Gap between groups of bars
-    )
-    
-    #figure.show()
-    st.plotly_chart(figure)
 
-def prediction(stock_data):
+#predicting the next day price of stock 
+def prediction(stock_data) -> None:
+        
     st.subheader("Prediction Of A next Day Stock")
-    actual,predicted=model_train(stock_data,stock_data)
+    
     if st.button("Predict") :
-                 st.write(f"Actual Value is {actual}")
-                 st.write(f"Predicted Value {predicted}")
+        predicted=stock_prediction(stock_data)
+        st.write(f"Predicted Value {predicted}")
         
 if __name__ == "__main__":
        
     st.title('Stock Forecast App')
-    
+    #getting input from the user
     stock_data = get_input()   
     
     if stock_data is not None and not stock_data.empty:
         st.subheader("Price and Volume Information Of The Entered Stock:")
+        #displaying stock today as first row
         reverse=stock_data.iloc[::-1]
         st.write(reverse)
         filter_data(stock_data)
@@ -222,6 +184,6 @@ if __name__ == "__main__":
         
         candlesticks_plot(stock_data)
         line_plot(stock_data)
-        plot_price_volume(stock_data)
+        
     else:
         st.warning("No valid data to display.")
