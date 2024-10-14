@@ -55,8 +55,8 @@ def search_comp(company_name) -> yf.ticker:
         
         ticker = search_result['quotes'][choice - 1]['symbol']
         st.write(ticker)
-        if st.button("Enter"):
-            return ticker 
+        #if st.button("Enter"):
+        return ticker 
 
 
 def load_data(ticker) -> pd.DataFrame:
@@ -78,7 +78,7 @@ def load_data(ticker) -> pd.DataFrame:
         st.error(f"Failed to fetch data for {ticker}. Error: {e}")
         return None
     
-def filter_data(df: pd.DataFrame) -> pd.DataFrame:
+def filter_data(df) -> pd.DataFrame:
     st.subheader("Filter Stock Price by Month")
 
     # Ensure 'Date' is the index and reset it to a column for easier filtering
