@@ -161,7 +161,7 @@ def candlesticks_plot(df) -> None:
 #predicting the next day price of stock 
 def prediction(stock_data) -> None:
         
-    st.subheader("Prediction Of A next Day Stock")
+    st.subheader("Predicted Price of Next Day")
     
     if st.button("Predict") :
         predicted=stock_prediction(stock_data)
