@@ -1,16 +1,19 @@
-pip install --upgrade pip
-streamlit==1.39.0
-numpy==2.1.2
-matplotlib==3.7.1
-pandas==2.2.3
-scikit-learn==1.5.2
-tensorflow>=2.14.0,<2.16.0
-keras_tuner>=1.1.0,<1.2
-datetime 
-yfinance>=0.1.72,<0.3
-yahooquery>=2.2,<3.0
-plotly>=5.0,<6.0
+pip>24.2
 setuptools
 wheel
+pandas
+numpy
+seaborn
+matplotlib
+scikit-learn
+catboost
+xgboost
+streamlit
+plotly
+yahooquery
+yfinance
+datetime
+keras_tuner
+tensorflow
 
 # -e .
