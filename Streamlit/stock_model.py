@@ -13,6 +13,11 @@ from tensorflow.keras.layers import LSTM, Dense, BatchNormalization, Dropout
 from datetime import datetime, timedelta
 import keras_tuner as kt
 import warnings
+import os
+
+dir_path = os.path.join(os.getcwd(), 'my_dir')
+if not os.path.exists(dir_path):
+    os.makedirs(dir_path)
 
 warnings.filterwarnings("ignore")
 
@@ -50,7 +55,7 @@ def predict(stock_data):
                          objective='val_loss',
                          max_epochs=25,
                          hyperband_iterations=2,
-                         directory='my_dir',
+                         directory=dir_path,
                          project_name='stock_price_tuning')
     
     
