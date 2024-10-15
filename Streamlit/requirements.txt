@@ -1,7 +1,7 @@
 pandas>=1.1.5,<2.1
 numpy>=1.19.5,<1.24
 scikit-learn>=0.24,<1.2
-tensorflow>=2.5,<3.0
+tensorflow>=2.14.0,<2.15.0
 keras_tuner>=1.1.0,<1.2
 datetime 
 streamlit>=1.4,<2.0
