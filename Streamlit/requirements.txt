@@ -1,3 +1,4 @@
+pip install --upgrade pip
 streamlit==1.39.0
 numpy==2.1.2
 matplotlib==3.7.1
